@@ -1,0 +1,9 @@
+[package]
+name = "rust-removie"
+version = "1.2.4"
+authors = ["hedgar <hedgar2017@gmail.com>"]
+
+[dependencies]
+clap = "2.32.0"
+tokio = "0.1.7"
+tokio-process = "0.2.2"
