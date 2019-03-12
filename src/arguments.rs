@@ -1,4 +1,6 @@
-use clap;
+//!
+//! The arguments processing module.
+//!
 
 #[derive(Clone)]
 pub struct Arguments {
@@ -204,7 +206,15 @@ impl Arguments {
             language: language.to_owned(),
             title: title.to_owned(),
             destination: destination.to_owned(),
-            output_path: destination + "/" + args.value_of("prefix").map(|v| v.to_owned() + ".").unwrap_or_default().as_str() + title + ".mkv",
+            output_path: destination
+                + "/"
+                + args
+                    .value_of("prefix")
+                    .map(|v| v.to_owned() + ".")
+                    .unwrap_or_default()
+                    .as_str()
+                + title
+                + ".mkv",
             dummy,
         })
     }
@@ -273,7 +283,7 @@ impl ::std::fmt::Display for Arguments {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         writeln!(f, "{0} ARGUMENTS {0}", "_".repeat(32))?;
         for i in 0..self.inputs.len() {
-            writeln!(f, "Input #{:04}: {}", i + 1, self.inputs.get(i).unwrap())?;
+            writeln!(f, "Input #{:04}: {}", i + 1, self.inputs[i])?;
         }
         if self.dummy {
             writeln!(f, "Dummy mode!")?;

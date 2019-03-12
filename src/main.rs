@@ -1,8 +1,8 @@
-mod arguments;
+//!
+//! The application binary.
+//!
 
-extern crate clap;
-extern crate tokio;
-extern crate tokio_process;
+mod arguments;
 
 use std::{fs, process::Command};
 
@@ -86,7 +86,7 @@ fn main() {
     }));
 
     let mut futures = Vec::with_capacity(children.len());
-    for mut child in children {
+    for child in children {
         let future = child.map(|_| ()).map_err(|error| panic!("{}", error));
         futures.push(future);
     }
@@ -102,7 +102,11 @@ fn main() {
     args.push("-o".to_owned());
     args.push(data.output_path().to_owned());
     args.push("--language".to_owned());
-    args.push(format!("{}:{}", data.video_stream(), data.language().to_owned()));
+    args.push(format!(
+        "{}:{}",
+        data.video_stream(),
+        data.language().to_owned()
+    ));
     args.push("-A".to_owned());
     args.push("-S".to_owned());
     args.push("-T".to_owned());
@@ -188,11 +192,11 @@ fn main() {
     if status.success() {
         for stream in data.audio_streams().iter() {
             fs::remove_file(format!("{}.ogg", stream.replace(":", "_")))
-                .expect(&format!("Failed to cleanup the {} stream", stream));
+                .unwrap_or_else(|_| panic!("Failed to cleanup the {} stream", stream));
         }
         for stream in data.subtitle_streams().iter() {
             fs::remove_file(format!("{}.srt", stream.replace(":", "_")))
-                .expect(&format!("Failed to cleanup the {} stream", stream));
+                .unwrap_or_else(|_| panic!("Failed to cleanup the {} stream", stream));
         }
     }
 }
