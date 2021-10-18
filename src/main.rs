@@ -2,24 +2,25 @@
 //! The application binary.
 //!
 
-mod arguments;
+pub(crate) mod arguments;
 
-use std::{fs, process::Command};
+use std::process::Command;
 
-use tokio::prelude::{future::join_all, *};
+use tokio::prelude::future::join_all;
+use tokio::prelude::*;
 use tokio_process::CommandExt;
 
-use arguments::Arguments;
+use self::arguments::Arguments;
 
 #[cfg(target_os = "windows")]
-static FFMPEG_EXE: &'static str = "ffmpeg.exe";
+static FFMPEG_EXE: &str = "ffmpeg.exe";
 #[cfg(target_os = "windows")]
-static MKVMERGE_EXE: &'static str = "mkvmerge.exe";
+static MKVMERGE_EXE: &str = "mkvmerge.exe";
 
 #[cfg(target_os = "linux")]
-static FFMPEG_EXE: &'static str = "ffmpeg";
+static FFMPEG_EXE: &str = "ffmpeg";
 #[cfg(target_os = "linux")]
-static MKVMERGE_EXE: &'static str = "mkvmerge";
+static MKVMERGE_EXE: &str = "mkvmerge";
 
 fn main() {
     let data = Arguments::from_cmd().unwrap();
@@ -87,10 +88,12 @@ fn main() {
 
     let mut futures = Vec::with_capacity(children.len());
     for child in children {
-        let future = child.map(|_| ()).map_err(|error| panic!("{}", error));
+        let future = child.map(|_| ()).map_err(|error| panic!("{:?}", error));
         futures.push(future);
     }
-    let encoding = join_all(futures).map(|_| ()).map_err(|error| panic!(error));
+    let encoding = join_all(futures)
+        .map(|_| ())
+        .map_err(|error| panic!("{:?}", error));
     tokio::run(encoding);
 
     let mut args =
@@ -191,11 +194,11 @@ fn main() {
         .expect("Failed to wait for a command");
     if status.success() {
         for stream in data.audio_streams().iter() {
-            fs::remove_file(format!("{}.ogg", stream.replace(":", "_")))
+            std::fs::remove_file(format!("{}.ogg", stream.replace(":", "_")))
                 .unwrap_or_else(|_| panic!("Failed to cleanup the {} stream", stream));
         }
         for stream in data.subtitle_streams().iter() {
-            fs::remove_file(format!("{}.srt", stream.replace(":", "_")))
+            std::fs::remove_file(format!("{}.srt", stream.replace(":", "_")))
                 .unwrap_or_else(|_| panic!("Failed to cleanup the {} stream", stream));
         }
     }

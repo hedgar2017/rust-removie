@@ -203,7 +203,7 @@ impl Arguments {
                     }
                 })
                 .collect::<Vec<String>>(),
-            language: language.to_owned(),
+            language,
             title: title.to_owned(),
             destination: destination.to_owned(),
             output_path: destination
